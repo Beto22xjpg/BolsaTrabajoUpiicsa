@@ -94,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => loading = false);
 
       if (roleLower == "estudiante") {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const StudentHomePage()));
       } else if (roleLower == "publicador") {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const PublisherLayout()));
       } else if (roleLower == "validador") {

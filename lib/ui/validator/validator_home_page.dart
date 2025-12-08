@@ -96,6 +96,7 @@ class _ValidatorHomePageState extends State<ValidatorHomePage> {
                   : RefreshIndicator(
                       onRefresh: cargarPendientes,
                       child: ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(), 
                         padding: const EdgeInsets.all(20),
                         itemCount: vacantes.length,
                         itemBuilder: (_, i) {

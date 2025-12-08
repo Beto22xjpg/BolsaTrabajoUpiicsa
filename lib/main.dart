@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       home: const LoginPage(),
 
       routes: {
-        "/estudiante": (_) => const HomePage(),
+        "/estudiante": (_) => const StudentHomePage(),
         "/publicador": (_) => const PublisherLayout(),
         "/validador": (_) => const ValidatorLayout(),
         "/admin":     (_) => const AdminLayout(),

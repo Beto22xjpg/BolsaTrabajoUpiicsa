@@ -1,6 +1,3 @@
-// Página para crear vacante — envía id_publicador (y created_by por seguridad)
-// Asegúrate que tu API acepte id_publicador o created_by.
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -36,17 +33,22 @@ class _PublisherCreatePageState extends State<PublisherCreatePage> {
 
   bool loading = false;
 
-  final String apiBase = "http://192.168.0.92/bolsa_api/api.php?endpoint=vacantes&action=";
+  final String apiBase =
+      "http://192.168.0.92/bolsa_api/api.php?endpoint=vacantes&action=";
 
   Future<void> guardarYEnviar() async {
     final pubId = AuthService.userId;
     if (pubId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("No se encontró id de publicador. Reingresa sesión.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No se encontró id de publicador. Reingresa sesión.")),
+      );
       return;
     }
 
     if (titulo.text.trim().isEmpty || empresa.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Título y empresa son obligatorios")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Título y empresa son obligatorios")),
+      );
       return;
     }
 
@@ -61,13 +63,16 @@ class _PublisherCreatePageState extends State<PublisherCreatePage> {
       "categoria": categoria ?? "",
       "modalidad": modalidad ?? "",
       "horario": horario ?? "",
-      "ubicacion": direccion.text.trim(),
       "tipo": tipo ?? "",
+      "ubicacion": direccion.text.trim(), // mismo valor
       "descripcion": descripcion.text.trim(),
-      "telefono": telefono.text.trim(),
-      "correo": correo.text.trim(),
-      "sitio": sitio.text.trim(),
-      // envío ambos por compatibilidad con diferentes backends:
+
+      // 📌 CAMPOS CORRECTOS SEGÚN BD:
+      "contacto_tel": telefono.text.trim(),
+      "contacto_email": correo.text.trim(),
+      "contacto_web": sitio.text.trim(),
+
+      // por seguridad
       "created_by": pubId.toString(),
       "id_publicador": pubId.toString(),
     };
@@ -76,7 +81,9 @@ class _PublisherCreatePageState extends State<PublisherCreatePage> {
       final res = await http.post(uri, body: body);
 
       if (res.statusCode != 200) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error HTTP: ${res.statusCode}")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error HTTP: ${res.statusCode}")),
+        );
         setState(() => loading = false);
         return;
       }
@@ -85,20 +92,28 @@ class _PublisherCreatePageState extends State<PublisherCreatePage> {
       try {
         data = json.decode(res.body);
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Respuesta inválida del servidor")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Respuesta inválida del servidor")),
+        );
         setState(() => loading = false);
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data["mensaje"] ?? "Respuesta del servidor")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(data["mensaje"] ?? "Respuesta del servidor")),
+      );
+
       setState(() => loading = false);
 
       if (data["error"] == false) {
         Navigator.pop(context, true);
       }
+
     } catch (e) {
       setState(() => loading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Excepción: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Excepción: $e")),
+      );
     }
   }
 
@@ -117,21 +132,38 @@ class _PublisherCreatePageState extends State<PublisherCreatePage> {
             _input("Título de la vacante", titulo),
             _input("Empresa", empresa),
             _input("Dirección", direccion),
+
             _dropdown("Categoría", categorias, (v) => categoria = v),
             _dropdown("Modalidad", modalidades, (v) => modalidad = v),
             _dropdown("Horario", horarios, (v) => horario = v),
             _dropdown("Tipo de vacante", tipos, (v) => tipo = v),
+
             _input("Teléfono", telefono),
-            _input("Correo", correo),
+            _input("Correo electrónico", correo),
             _input("Sitio web", sitio),
+
             _largeInput("Descripción", descripcion),
+
             const SizedBox(height: 20),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: loading ? null : guardarYEnviar,
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF01472B)),
-                child: loading ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text("Guardar y Enviar a Validación", style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF01472B),
+                ),
+                child: loading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text("Guardar y Enviar a Validación",
+                        style: TextStyle(color: Colors.white)),
               ),
             )
           ],
@@ -181,7 +213,9 @@ class _PublisherCreatePageState extends State<PublisherCreatePage> {
           filled: true,
           fillColor: Colors.white,
         ),
-        items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+        items: items
+            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+            .toList(),
         onChanged: onChange,
       ),
     );
